@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+
+    <head>
+
+        <!-- Required meta tags -->
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+        <!-- Custom stylesheet -->
+        <link rel='stylesheet' href='static/css/main.css' type='text/css'>
+
+        <!-- Google Font (Poppins) -->
+        <link rel='stylesheet' href='static/css/fonts.css' type='text/css'>
+
+        <!-- Font Awesome Icons -->
+        <link rel='stylesheet' href='/static/fontawesome-icons/css/fontawesome.css'>
+        <link rel='stylesheet' href='/static/fontawesome-icons/css/solid.css'>
+
+        <!-- jQuery download -->
+        <script src='static/js/jquery-3.6.0.min.js'></script>
+         
+        <!-- Custom JavaScript -->
+        <script src='static/js/main.js'></script>
+
+        {% block head %}{% endblock %}
+
+        <title>{% block title %}{% endblock %} • ShareBill</title>
+        <link rel='icon' type='image/svg' href='static/logo.svg'>
+
+    </head>
+    <body>
+
+        <!-- Display sidebar for logged in users -->
+        {% if current_user.is_authenticated %}
+            <div id='sidebar'>
+                <div class='title-container'>
+                    <div class='icon'>
+                        <i class='fa-solid fa-comments-dollar' aria-hidden='true'></i>
+                    </div>
+                    <span>ShareBill</span>
+                </div>
+                <div class='links-container'>
+                    <a href='/' class='link'>
+                        <div class='icon'>
+                            <i class='fas fa-home' aria-hidden='true'></i>
+                        </div>
+                        <span>Dashboard</span>
+                    </a>
+                    <div onclick="openModal('modal-group')" class='link'>
+                        <div class='icon'>
+                            <i class='fa-solid fa-plus' aria-hidden='true'></i>
+                        </div>
+                        <span>New group</span>
+                    </div>
+                    <div onclick='toggleAccordion()' class='link accordion'>
+                        <div class='icon'>
+                            <i id='accordion-icon' class='fa-solid fa-chevron-right' aria-hidden='true'></i>
+                        </div>
+                        <span>Groups</span>
+                    </div>
+                    <div id='groups-panel' class='accordion-panel'>
+                        {% for group in groups %}
+                            <a href='/group-{{ group.id }}' class='link'>
+                                <div class='icon'>
+                                    <i class='fa-solid fa-circle' aria-hidden='true'></i>
+                                </div>
+                                <span>{{ group.name | truncate(15) }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <a href='/logout' class='link'>
+                        <div class='icon'>
+                            <i class='fas fa-sign-out-alt' aria-hidden='true'></i>
+                        </div>
+                        <span>Sign out</span>
+                    </a>
+                </div>        
+            </div>
+
+            <!-- Modal to create groups -->
+            <div id='modal-group' class='modal-background'>
+                <div class='modal modal-content'>
+                    <form>
+                        <h3>Create group</h3>
+                        <span onclick="closeModal('modal-group')" class='btn-icon right-aligned' style='font-size: 1.5rem'>
+                            <i class='fa-solid fa-xmark' aria-hidden='true'></i>
+                            <span class='visually-hidden'>Close modal</span>
+                        </span>
+                        <br>
+                        <label for='group_name' class='visually-hidden'>New group name</label>
+                        <input type='text' id='group_name' class='my-form' placeholder='New group name' autocomplete='off'>
+                        <div id='error_msg1' class='alert alert-error hidden'></div>
+                        <button type='button' onclick='createGroup()' class='btn btn-primary'>Create</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        <main>
+            {% block main %}{% endblock %} 
+        </main>
+    </body>
+</html>

@@ -1,0 +1,122 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+{% block main %}
+    
+    <section id='main-content'>
+
+        <!-- Notifications of new bills -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <header>
+                        <div class='alert alert-info'>
+                            <span>
+                                <i class='fa-solid fa-bell' aria-hidden='true'></i>
+                                &nbsp; {{ message }}
+                            </span>
+                        </div>
+                    </header>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+          
+        <h1>Dashboard</h1>
+
+        <section id='grid-container' class='dashboard-grid'>
+            
+            <!-- Container 1: total balance (amount owed to user - amount user owes) -->
+            <div class='grid-item one'>
+                <h3>Total balance</h3>
+                {% if balance < 0 %}
+                    <p class='dash-amt Pending'>-${{ '%0.2f' % balance | abs }}</p>
+                {% elif balance > 0 %}
+                    <p class='dash-amt Settled'>+${{ '%0.2f' % balance }}</p>
+                {% else %}
+                    <p class='dash-amt'>${{ '%0.2f' % balance }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Container 2: amount user owes (debt) -->
+            <div class='grid-item two'>
+                <h3>You owe</h3>
+                <p class='dash-amt Pending'>${{ '%0.2f' % debt_amount }}</p>
+            </div>
+
+            <!-- Container 3: amount owed to user (credit) -->
+            <div class='grid-item three'>
+                <h3>You are owed</h3>
+                <p class='dash-amt Settled'>${{ '%0.2f' % credit_amount }}</p>
+            </div>
+
+            <!-- Container 4: number of user's pending debts -->
+            <div class='grid-item four'>
+                <h3>Pending debts</h3>
+                <p class='dash-amt'>{{ all_debts | length }}</p>
+            </div>
+            
+            <!-- Container 5: debts table -->
+            <div class='grid-item five'>
+                <h3>Pending debts</h3>
+                {% if all_debts %}
+                    <table class='table-full'>
+                        <thead>
+                            <tr>
+                                <th class='first-col'>Description</th>
+                                <th>Group</th>
+                                <th>Amount owed</th>
+                                <th>Date</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for debt in all_debts %}
+                                <tr>
+                                    <td class='first-col'>{{ debt[1].description | truncate(20) }}</td>
+                                    <td>{{ (((groups | selectattr("id", "==", debt[0].group_id)) | list)[0].name) | truncate(20) }}</td>
+                                    <td>${{ '%0.2f' % debt[0].amount }}</td>
+                                    <td>{{ debt[1].date.strftime('%d %b %Y') }}</td>
+                                    <!-- Text to indicate new/unseen debts -->
+                                    {% if debt[0].seen == False %}
+                                        <td><span class='table-span blue-outline'>New</span></td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    <td class='last-col'>
+                                        <a class='btn-icon' href='/group-{{ debt[0].group_id }}'>
+                                            <i class='fa-solid fa-angle-right' aria-hidden='true'></i>
+                                            <span class='visually-hidden'>Go to group</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No debts owed</p>
+                {% endif %}
+            </div>
+
+            <div class='grid-item six'>
+                <h3>Expenditure by group</h3>
+                {% if expenses_grouped %}
+                    <table>
+                        {% for group in expenses_grouped %}
+                        <tr>
+                            <td>{{ group.name | truncate(15) }}</td>
+                            <td class='right-col'>${{ '%0.2f' % group.amount }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p>No expenses added</p>
+                {% endif %}
+            </div>
+
+        </section>
+    </section>
+{% endblock %}

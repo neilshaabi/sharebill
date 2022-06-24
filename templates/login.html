@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Sign in
+{% endblock %}
+
+{% block main %}
+
+    <div id='container-login'>
+
+        <!-- Container 1: login -->
+        <div id='container-login-1'>
+            <form action='/login' method='post'>
+                <h2>Sign in to ShareBill</h2>
+                <p>All your shared expenses in one place.</p>
+                <br>
+                <label for='email' class='visually-hidden'>Email address</label>
+                <input type='email' id='email' name='email' placeholder='Email address' class='my-form' autofocus>
+                <label for='password' class='visually-hidden'>Email address</label>
+                <input type='password' id='password' name='password' placeholder='Password' class='my-form'>
+                {% if error %}
+                    <div class='alert alert-error'>{{ error }}</div>
+                {% endif %}
+                <div>
+                    <button type='submit' class='btn btn-primary'>Sign in</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Container 2: register -->
+        <div id='container-login-2'>
+            <form action='/register' method='get'>
+                <h2>Hello, Friend!</h2>
+                <p class='white'>Register for a free account to start managing your shared expenses</p>
+                <br>
+                <button type='submit' class='btn btn-light'>Register</button>
+            </form>
+        </div>
+    
+    </div>
+
+{% endblock %}

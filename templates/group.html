@@ -1,0 +1,210 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <script src='static/js/group.js'></script>
+{% endblock %}
+
+{% block title %}
+    {{ group.name }}
+{% endblock %}
+
+{% block main %}
+    
+    <section id='main-content'>
+
+        <!-- Success messages (flash not used to avoid having to reload page) -->
+        <header>
+            <div class='alert alert-success hidden'>
+                <span>
+                    <i class='fa-solid fa-check' aria-hidden='true'></i>
+                    &nbsp; <span id='success-msg'></span>
+                </span>
+            </div>
+        </header>
+        
+        <h1>{{ group.name }}</h1>
+
+        <!-- Button to trigger modal to add expense -->
+        <button type='button' class='btn btn-primary right-aligned' onclick="openModal('modal-expense')">Add expense</button>
+
+        <section id='grid-container' class='group-grid'>
+
+            <!-- Container 1: add group member -->
+            <div class='grid-item one'>
+                <h3>Add group member</h3>
+                <form>
+                    <label for='email' class='visually-hidden'>Email address</label>
+                    <input type='text' id='email' placeholder='Email address' class='my-form' autocomplete='off'>
+                    <div id='error_msg3' class='alert alert-error hidden'></div>
+                    <button type='button' class='btn btn-primary' onclick="addMember('{{ group.id }}')">Add member</button>
+                </form>
+            </div>
+
+            <!-- Container 2: expenses table -->
+            <div class='grid-item two'>
+                <h3>Group expenses</h3>
+                {% if expenses %}
+                    <table class='table-full'>
+                        <thead>
+                            <tr>
+                                <th class='first-col'>Description</th>
+                                <th>Amount</th>
+                                <th>Paid by</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Each of the group's expenses represented as a single row, ordered by most recent first -->
+                            {% for expense in expenses %}
+                                <tr class='tr-expandable' id='row-{{ expense[0].id }}'>
+                                    <td class='first-col'>{{ expense[0].description | truncate(20) }}</td>
+                                    <td>${{ '%0.2f' % expense[0].amount }}</td>
+                                    <td>{{ (((members | selectattr("id", "==", expense[0].payer_id)) | list)[0].first_name) | truncate(10)}}</td>
+                                    <td>{{ expense[0].date.strftime('%d %b %Y') }}</td>
+                                    <td><span class='table-span white' style='background-color: {{ expense[1].colour }}'>{{ expense[0].category }}</span></td>
+                                    <td><span id='exp-text-{{ expense[0].id }}' class='{{ expense[0].status }}'>{{ expense[0].status }}</span></td>
+                                    <td class='last-col'>
+                                        <a class='btn-icon' href='/delete_expense/{{ group.id }}/{{ expense[0].id }}'>
+                                            <i class='fa-solid fa-xmark' aria-hidden='true'></i>
+                                            <span class='visually-hidden'>Delete expense</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <!-- Accordion panel displaying all debts associated with this expense -->
+                                <tr>
+                                    <td colspan='7' style='border-bottom: none'>
+                                        <div id='panel-row-{{ expense[0].id }}' class='accordion-panel'>
+                                            <h4>Balances</h4>
+                                            {% for debt in (debts | selectattr("expense_id", "==", expense[0].id)) %}
+                                                <p>
+                                                    <strong>{{ ((members | selectattr("id", "==", debt.user_id)) | list)[0].first_name }}</strong>
+                                                        {% if debt.settled == false %}
+                                                            <span id='debt-status-{{ debt.id }}' class='Pending'>owes</span>
+                                                        {% else %}
+                                                            <span id='debt-status-{{ debt.id }}' class='Settled'>paid</span>
+                                                        {% endif %}
+                                                    ${{ '%0.2f' % debt.amount }}
+                                                    <button type='button' id='debt-{{ debt.id }}' onclick="settleDebt('{{ debt.id }}', '{{ expense[0].id }}')" class='btn btn-grey right-aligned'>
+                                                    {% if (debt.settled == false) %}
+                                                        Mark as settled
+                                                    {% else %}
+                                                        Undo
+                                                    {% endif %}
+                                                    </button>
+                                                </p>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No expenses added</p>
+                {% endif %}
+            </div>
+
+            <!-- Container 3: expenses by category -->
+            <div class='grid-item three'>
+                <h3>Expenditure by category</h3>
+                <div class='right-aligned'>
+                    <button type='button' onclick='showCurrency()' class='btn btn-outline'>$</button>
+                    <button type='button' onclick='showPercentage()' class='btn btn-outline'>%</button>
+                </div>
+                <table>
+                    {% for category in expenses_categorised %}
+                        <tr>
+                            <td style='width: 10%'>
+                                <i class='{{ category.icon }} table-span category-icon white' style="background-color: {{ category.colour }}" aria-hidden='true'></i>
+                            </td>
+                            <td>{{ category.category }}</td>
+                            <td class='right-col currency'>${{ '%0.2f' % category.amount_categorised }}</td>
+                            <td class='right-col percent' style='display: none;'>{{ '%0.1f' % (category.amount_categorised / total_amount * 100) }}%</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td></td>
+                            <td><strong>Total</strong></td>
+                            <td class='right-col'><strong>${{ '%0.2f' % total_amount }}</strong></td>
+                            <td></td>
+                        </tr>
+                </table>
+            </div>
+        </section>
+    </section>
+
+    <!-- Modal to add expense -->
+    <div id='modal-expense' class='modal-background'>
+        <div class='modal modal-content'>
+            <h3>New Expense</h3>
+            <span onclick="closeModal('modal-expense')" class='btn-icon right-aligned'>
+                <i class='fa-solid fa-xmark' aria-hidden='true'></i>
+                <span class='visually-hidden'>Close modal</span>
+            </span>
+            <br>
+            <form id='expense-form'>
+                <input type='hidden' id='{{ group.id }}'>
+                <select id='payer'>
+                    <option disabled selected value id='payer-none'>Paid by</option>
+                    {% for member in members %}
+                        <option id='payer-{{ member.id }}'>{{ member.first_name }}</option>
+                    {% endfor %}
+                </select>
+                <label for='description' class='visually-hidden'>Description</label>
+                <input type='text' id='description' placeholder='Description' class='my-form' autocomplete='off'>
+                <label for='total-amount' class='visually-hidden'>Amount</label>
+                <input type='number' id='total-amount' placeholder='Amount' min='0.01' step='0.01' class='my-form' autocomplete='off'>
+                <input type='radio' checked id='split-equally' name='split-option1' onchange='toggleSplitOptions()'>
+                <label for='split-equally' class='label-radio'>Split equally between all members</label><br>
+                <input type='radio' id='split-differently' name='split-option1' onchange='toggleSplitOptions()'>
+                <label for='split-differently' class='label-radio'>Split differently</label>
+                
+                <!-- Table with different options to split expense -->
+                <div>
+                    <table id='split-options-table'>
+                        <tr>
+                            <td class='split-option active-option' id='equal' onclick='showOption(this)'>Equally</td>
+                            <td class='split-option' id='amount' onclick='showOption(this)'>Amount</td>
+                            <td class='split-option' id='percentage' onclick='showOption(this)'>Percentage</td>
+                        </tr>
+                        <tr>
+                            <td style='border-top: none' colspan='3' class='first-col'>
+                                <input type='checkbox' checked id='all-box' onclick='selectAll(this)'>
+                                <label for='all-box' class='label-radio'><strong>All</strong></label>
+                            </td>
+                        </tr>
+                        {% for member in members %}
+                            <tr>
+                                <td colspan='3' class='first-col'>
+                                    <input type='checkbox' checked id='{{ member.id }}' class='member-box' name='debtor' onclick='selectDebtor(this)'>
+                                    <label for='{{ member.id }}' class='label-radio'>{{ member.first_name }}</label>
+                                    <br>
+                                    <label for='amount-{{ member.id }}' class='visually-hidden'>Amount paid</label>
+                                    <input type='number' id='amount-{{ member.id }}' placeholder='$' class='my-form input-field amount hidden' min='0.01' step='0.01' autocomplete='off' disabled>
+                                    <label for='amount-{{ member.id }}' class='visually-hidden'>Percentage paid</label>
+                                    <input class='my-form input-field percentage hidden' id='percent-{{ member.id }}' placeholder='%' min='0.1' max='100' step='0.1' type='number' autocomplete='off' disabled>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+                <select id='category'>
+                    <option disabled selected value>Category</option>
+                    {% for category in categories %}
+                        <option>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for='date' class='visually-hidden'>Date</label>
+                <input type='date' id='date' class='my-form'>
+                <div id='error_msg2' class='alert alert-error hidden'></div>
+                <!-- <button type='button' onclick="addExpense('{{ group.id }}')" class='btn btn-primary'>Add expense</button> -->
+                <button type='submit' class='btn btn-primary'>Add expense</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
