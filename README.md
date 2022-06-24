@@ -2,7 +2,7 @@
 
 ShareBill is a Flask web application that allows users to manage their shared expenses with various groups.
 
-![Sample image](sample.png)
+![Sample image](preview.png)
 
 ___
 
