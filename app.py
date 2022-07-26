@@ -173,7 +173,7 @@ def index():
     # Flash notification with number of new debts
     if new_debts:
         if len(new_debts) == 1:
-            flash('You have 1 new pending debt'.format(len(new_debts)))
+            flash('You have 1 new pending debt')
         else:
             flash('You have {} new pending debts'.format(len(new_debts)))
 
