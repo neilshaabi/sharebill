@@ -64,7 +64,7 @@ def register():
         password = request.form.get('password')
         password_confirmation = request.form.get('password_confirmation')
 
-        # Ensure description was entered
+        # Ensure full name was entered
         if not first_name or not last_name:
             error = 'Please enter your full name'
 
