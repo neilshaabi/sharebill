@@ -8,7 +8,7 @@ db = SQLAlchemy()
 
 # Model of a user for  database
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.Text, unique=True)
     password_hash = db.Column(db.Text)
@@ -23,7 +23,7 @@ class User(UserMixin, db.Model):
 
 
 class Group(db.Model):
-    __tablename__ = 'groups'
+    __tablename__ = "groups"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
 
@@ -32,9 +32,9 @@ class Group(db.Model):
 
 
 class User_Group(db.Model):
-    __tablename__ = 'user_groups'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), primary_key=True)
+    __tablename__ = "user_groups"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), primary_key=True)
 
     def __init__(self, user_id, group_id):
         self.user_id = user_id
@@ -42,10 +42,10 @@ class User_Group(db.Model):
 
 
 class Expense(db.Model):
-    __tablename__ = 'expenses'
+    __tablename__ = "expenses"
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
-    payer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"))
+    payer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     description = db.Column(db.Text)
     amount = db.Column(db.Float)
     category = db.Column(db.Text)
@@ -63,11 +63,11 @@ class Expense(db.Model):
 
 
 class Debt(db.Model):
-    __tablename__ = 'debts'
+    __tablename__ = "debts"
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
-    expense_id = db.Column(db.Integer, db.ForeignKey('expenses.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"))
+    expense_id = db.Column(db.Integer, db.ForeignKey("expenses.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     amount = db.Column(db.Float)
     settled = db.Column(db.Boolean)
     seen = db.Column(db.Boolean)
@@ -82,9 +82,9 @@ class Debt(db.Model):
 
 
 class Category(db.Model):
-    __tablename__ = 'categories'
+    __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, db.ForeignKey('expenses.category'))
+    name = db.Column(db.Text, db.ForeignKey("expenses.category"))
     icon = db.Column(db.Text)
     colour = db.Column(db.Text)
 
@@ -92,35 +92,31 @@ class Category(db.Model):
         self.name = name
         self.icon = icon
         self.colour = colour
-    
+
 
 # Insert dummy data into tables
 def dbinit():
     user_list = [
-        User('jack@gmail.com', generate_password_hash('jack4'), 'Jack', 'Johnson'),
-        User('john@gmail.com', generate_password_hash('john5'), 'John', 'Doe'),
-        User('tom@gmail.com', generate_password_hash('tom6'), 'Thomas', 'Smith'),
-        User('alex@gmail.com', generate_password_hash('alex7'), 'Alex', 'Jones')
+        User("jack@gmail.com", generate_password_hash("jack4"), "Jack", "Johnson"),
+        User("john@gmail.com", generate_password_hash("john5"), "John", "Doe"),
+        User("tom@gmail.com", generate_password_hash("tom6"), "Thomas", "Smith"),
+        User("alex@gmail.com", generate_password_hash("alex7"), "Alex", "Jones"),
     ]
     db.session.add_all(user_list)
-    
+
     # Get ID of users
-    jack_id = User.query.filter_by(email='jack@gmail.com').first().id
-    john_id = User.query.filter_by(email='john@gmail.com').first().id
-    tom_id = User.query.filter_by(email='tom@gmail.com').first().id
+    jack_id = User.query.filter_by(email="jack@gmail.com").first().id
+    john_id = User.query.filter_by(email="john@gmail.com").first().id
+    tom_id = User.query.filter_by(email="tom@gmail.com").first().id
 
     # Create and add groups
-    groups = [
-        Group('Flat 71'),
-        Group('Summer 2022'),
-        Group('Leamington Flat')
-    ]
+    groups = [Group("Flat 71"), Group("Summer 2022"), Group("Leamington Flat")]
     db.session.add_all(groups)
 
     # Get ID of groups
-    flat71_id = Group.query.filter_by(name='Flat 71').first().id
-    trip_id = Group.query.filter_by(name='Summer 2022').first().id
-    leam_id = Group.query.filter_by(name='Leamington Flat').first().id
+    flat71_id = Group.query.filter_by(name="Flat 71").first().id
+    trip_id = Group.query.filter_by(name="Summer 2022").first().id
+    leam_id = Group.query.filter_by(name="Leamington Flat").first().id
 
     # Create and add user-group associations
     user_groups = [
@@ -134,19 +130,21 @@ def dbinit():
 
     # Create and add expenses
     flat71_expenses = [
-        Expense(flat71_id, tom_id,'Dinner', 30, 'Food', date.today(), 'Pending'),
-        Expense(flat71_id, john_id, 'Uber', 12, 'Transport', date.today(), 'Pending'),
-        Expense(flat71_id, jack_id,'Hotel deposit', 120, 'Housing', date.today(), 'Pending'),
-        Expense(leam_id, john_id, 'Lunch', 10, 'Food', date.today(), 'Pending')
+        Expense(flat71_id, tom_id, "Dinner", 30, "Food", date.today(), "Pending"),
+        Expense(flat71_id, john_id, "Uber", 12, "Transport", date.today(), "Pending"),
+        Expense(
+            flat71_id, jack_id, "Hotel deposit", 120, "Housing", date.today(), "Pending"
+        ),
+        Expense(leam_id, john_id, "Lunch", 10, "Food", date.today(), "Pending"),
     ]
     db.session.add_all(flat71_expenses)
 
     # Get ID of expenses
-    expense1_id = Expense.query.filter_by(description='Dinner').first().id
-    expense2_id = Expense.query.filter_by(description='Uber').first().id
-    expense3_id = Expense.query.filter_by(description='Hotel deposit').first().id
-    expense4_id = Expense.query.filter_by(description='Lunch').first().id
-    
+    expense1_id = Expense.query.filter_by(description="Dinner").first().id
+    expense2_id = Expense.query.filter_by(description="Uber").first().id
+    expense3_id = Expense.query.filter_by(description="Hotel deposit").first().id
+    expense4_id = Expense.query.filter_by(description="Lunch").first().id
+
     # Create and add debts
     flat71_debts = [
         Debt(flat71_id, expense1_id, jack_id, 10, False, False),
@@ -158,7 +156,7 @@ def dbinit():
         Debt(flat71_id, expense3_id, jack_id, 20, True, False),
         Debt(flat71_id, expense3_id, tom_id, 60, False, True),
         Debt(flat71_id, expense3_id, john_id, 40, False, False),
-        Debt(leam_id, expense4_id, john_id, 5, True, False)
+        Debt(leam_id, expense4_id, john_id, 5, True, False),
     ]
     db.session.add_all(flat71_debts)
 
@@ -168,14 +166,14 @@ def dbinit():
 
 # Insert category data (name, icon, colour)
 def init_categories():
-    
+
     categories = [
-        Category('Housing', 'fas fa-home', '#ffa500'),
-        Category('Utilities', 'fas fa-faucet', '#ffce56'),
-        Category('Food', 'fas fa-utensils', '#a2de48'),
-        Category('Transport', 'fas fa-bus', '#85cdff'),
-        Category('Recreation', 'fas fa-gamepad', '#006eb9'),
-        Category('Others', 'fas fa-coins', '#ca8dfd')
+        Category("Housing", "fas fa-home", "#ffa500"),
+        Category("Utilities", "fas fa-faucet", "#ffce56"),
+        Category("Food", "fas fa-utensils", "#a2de48"),
+        Category("Transport", "fas fa-bus", "#85cdff"),
+        Category("Recreation", "fas fa-gamepad", "#006eb9"),
+        Category("Others", "fas fa-coins", "#ca8dfd"),
     ]
     db.session.add_all(categories)
     db.session.commit()
