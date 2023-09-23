@@ -1,6 +1,6 @@
 # ShareBill
 
-Flask web application for managing shared expenses, built with Python, SQL, JavaScript, HTML and CSS.
+Web application to manage shared expenses, built with Flask, SQL, JavaScript, HTML and CSS.
 
 **Demo: https://youtu.be/OcrQcPPztnA**
 
